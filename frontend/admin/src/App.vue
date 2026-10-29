@@ -1,9 +1,9 @@
 <template>
   <ElConfigProvider :locale="elementLocale">
-    <RouterView />
+    <RouterView :key="locale" />
   </ElConfigProvider>
 </template>
 
 <script lang="ts" setup>
-import { elementLocale } from './i18n'
+import { elementLocale, locale } from './i18n'
 </script>

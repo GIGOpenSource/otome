@@ -63,7 +63,7 @@
           </ElSelect>
           <ElDropdown trigger="click">
             <span class="admin-user">
-              <ElAvatar :size="28">管</ElAvatar>
+              <ElAvatar :size="28">{{ adminMark }}</ElAvatar>
               <span>{{ adminName }}</span>
               <ElIcon><ArrowDown /></ElIcon>
             </span>
@@ -102,8 +102,8 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowDown, Avatar, Close, DataLine, Expand, Fold, Notebook, Picture, Promotion, User } from '@element-plus/icons-vue'
 import { clearAdminSession, getAdminName } from '../services/otome/api'
-import { LANGS, locale, setLocale, t } from '../i18n'
-import { langName } from '../utils/langs'
+import { locale, setLocale, t } from '../i18n'
+import { LANGS, langName } from '../utils/langs'
 
 type TabItem = { path: string; title: string; closable: boolean }
 type Crumb = { title: string; to?: string | { path: string } }
@@ -113,6 +113,7 @@ const COLLAPSE_KEY = 'otome-admin-collapse'
 
 const storedName = getAdminName()
 const adminName = computed(() => (storedName === '管理员' ? t('管理员') : storedName))
+const adminMark = computed(() => Array.from(adminName.value || t('管理员'))[0] || 'A')
 const route = useRoute()
 const router = useRouter()
 const isMobile = ref(window.innerWidth < 992)

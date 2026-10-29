@@ -8,15 +8,16 @@
     </section>
     <section class="login-panel">
       <ElSelect :model-value="locale" class="login-lang" @change="onLang">
-        <ElOption v-for="item in LANGS" :key="item.code" :label="item.name" :value="item.code" />
+        <ElOption v-for="item in LANGS" :key="item.code" :label="langName(item.code)" :value="item.code" />
       </ElSelect>
-      <RouterView />
+      <RouterView :key="locale" />
     </section>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { LANGS, locale, setLocale, t } from '../i18n'
+import { locale, setLocale, t } from '../i18n'
+import { LANGS, langName } from '../utils/langs'
 
 function onLang(code: string) {
   setLocale(String(code))
