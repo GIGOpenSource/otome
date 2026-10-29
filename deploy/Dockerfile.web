@@ -1,0 +1,6 @@
+# 页面在宿主机 page/frontend、page/admin，由 compose 挂载进去。
+# 证书在宿主机 ssl/，挂到 /etc/nginx/cert。
+FROM nginx:1.27-alpine
+COPY nginx.conf /etc/nginx/nginx.conf
+RUN sed -i 's/\r$//' /etc/nginx/nginx.conf
+EXPOSE 80 443

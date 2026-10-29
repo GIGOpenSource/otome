@@ -1,0 +1,51 @@
+{% extends "otome/base.html" %}
+{% block title %}数据列表 · 乙游后台{% endblock %}
+{% block content %}
+<h1>数据列表</h1>
+<p class="sub">登录、存档、解锁和游玩进度。每条都带着游戏标签，可以按游戏和类型筛选。</p>
+<div class="card">
+  <form method="get" class="filters">
+    <select name="game">
+      <option value="">全部游戏</option>
+      {% for game in games %}
+      <option value="{{ game.id }}" {% if selected_game == game.id %}selected{% endif %}>{{ game.title }}</option>
+      {% endfor %}
+    </select>
+    <select name="kind">
+      <option value="">全部类型</option>
+      {% for value, label in kinds %}
+      <option value="{{ value }}" {% if selected_kind == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="q" value="{{ keyword }}" placeholder="UID、邮箱或内容">
+    <button type="submit">筛选</button>
+  </form>
+  <table>
+    <thead>
+      <tr><th>时间</th><th>游戏</th><th>类型</th><th>UID</th><th>内容</th></tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.created_at|date:"Y-m-d H:i" }}</td>
+        <td><span class="tag">{{ row.game_title }}</span></td>
+        <td>{{ row.kind_label }}</td>
+        <td><span class="id">{{ row.uid }}</span></td>
+        <td>{{ row.title }}<div class="sub">{{ row.detail }}</div></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">还没有数据。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="pager">
+    {% if page.has_previous %}
+    <a href="{{ query }}{% if query %}&{% else %}?{% endif %}page={{ page.previous_page_number }}">上一页</a>
+    {% endif %}
+    <span>第 {{ page.number }} / {{ page.paginator.num_pages }} 页</span>
+    {% if page.has_next %}
+    <a href="{{ query }}{% if query %}&{% else %}?{% endif %}page={{ page.next_page_number }}">下一页</a>
+    {% endif %}
+  </p>
+</div>
+{% endblock %}

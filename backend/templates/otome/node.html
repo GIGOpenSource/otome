@@ -1,0 +1,185 @@
+{% extends "otome/base.html" %}
+{% block title %}剧情 · 乙游后台{% endblock %}
+{% block content %}
+<p><a href="/otome-admin/games/{{ game.id }}/?tab=plot">返回《{{ game.title }}》</a></p>
+<h1>{% if node %}编辑剧情{% else %}新增剧情{% endif %}</h1>
+<p class="sub">玩家客户端只会播放这些句子。把分支入口标成关键节点后，玩家选了这条线才下载这条线的图片和音频。</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+{% include "otome/image_specs.html" %}
+<div class="card">
+  <form method="post">
+    <input type="hidden" name="action" value="save">
+    <input type="hidden" name="stay_tab" value="{{ tab }}">
+    <div class="tabs" data-tabs data-current="{{ tab }}">
+      <button type="button" class="tab{% if tab == 'line' %} on{% endif %}" data-tab="line">对白</button>
+      <button type="button" class="tab{% if tab == 'visual' %} on{% endif %}" data-tab="visual">画面</button>
+      <button type="button" class="tab{% if tab == 'audio' %} on{% endif %}" data-tab="audio">声音</button>
+      <button type="button" class="tab{% if tab == 'insert' %} on{% endif %}" data-tab="insert">插入</button>
+      <button type="button" class="tab{% if tab == 'choice' %} on{% endif %}" data-tab="choice">选项</button>
+    </div>
+
+    <div class="tab-panel{% if tab == 'line' %} on{% endif %}" data-panel="line">
+      <label>剧情编号</label>
+      <input type="text" name="node_key" value="{{ node.node_key|default:'' }}" placeholder="例如 meet_gu">
+      <label>排序</label>
+      <input type="number" name="sort_order" value="{{ node.sort_order|default:0 }}">
+      <label>说话角色</label>
+      <select name="character">
+        <option value="">无</option>
+        {% for character in characters %}
+        <option value="{{ character.id }}" {% if node and node.character_id == character.id %}selected{% endif %}>{{ character.name }}</option>
+        {% endfor %}
+      </select>
+      <label>显示名（留空则用角色名，旁白就填「旁白」）</label>
+      <input type="text" name="speaker_name" value="{{ node.speaker_name|default:'' }}">
+      <label>对白</label>
+      <textarea name="content">{{ node.content|default:'' }}</textarea>
+      <label>没有选项时，下一句</label>
+      <select name="next_node">
+        <option value="">结束或等待选项</option>
+        {% for item in nodes %}
+        {% if not node or item.id != node.id %}
+        <option value="{{ item.id }}" {% if node and node.next_node_id == item.id %}selected{% endif %}>{{ item.node_key }} · {{ item.content|truncatechars:18 }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+      <label class="check"><input type="checkbox" name="is_start" {% if node and node.is_start %}checked{% endif %}>开场</label>
+      <label class="check"><input type="checkbox" name="is_key" {% if node and node.is_key %}checked{% endif %}>关键节点。进入前先下载这一段的图片和音频</label>
+      <label class="check"><input type="checkbox" name="is_ending" {% if node and node.is_ending %}checked{% endif %}>结局</label>
+      <label>结局标题</label>
+      <input type="text" name="ending_title" value="{{ node.ending_title|default:'' }}">
+    </div>
+
+    <div class="tab-panel{% if tab == 'visual' %} on{% endif %}" data-panel="visual">
+      <label>竖屏背景 <span class="sub">图片 1080 × 1920，或循环播放的视频</span></label>
+      <select name="background">
+        <option value="">不使用</option>
+        {% for image in images %}
+        <option value="{{ image.id }}" {% if node and node.background_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+        {% endfor %}
+        {% for video in videos %}
+        <option value="{{ video.id }}" {% if node and node.background_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+        {% endfor %}
+      </select>
+      <label>横屏背景 <span class="sub">图片 1920 × 1080，或循环播放的视频。不选时横屏会用竖屏背景</span></label>
+      <select name="background_land">
+        <option value="">不使用。播放端横屏时会暂时用竖屏背景</option>
+        {% for image in images %}
+        <option value="{{ image.id }}" {% if node and node.background_land_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+        {% endfor %}
+        {% for video in videos %}
+        <option value="{{ video.id }}" {% if node and node.background_land_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+        {% endfor %}
+      </select>
+      <label>竖屏立绘 <span class="sub">图片 1080 × 1920，或循环播放的视频。不选则用角色立绘</span></label>
+      <select name="portrait">
+        <option value="">使用角色立绘</option>
+        {% for image in images %}
+        <option value="{{ image.id }}" {% if node and node.portrait_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+        {% endfor %}
+        {% for video in videos %}
+        <option value="{{ video.id }}" {% if node and node.portrait_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+        {% endfor %}
+      </select>
+      <label>横屏立绘 <span class="sub">图片 1920 × 1080，或循环播放的视频。不选则用角色横屏立绘</span></label>
+      <select name="portrait_land">
+        <option value="">使用角色横屏立绘</option>
+        {% for image in images %}
+        <option value="{{ image.id }}" {% if node and node.portrait_land_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+        {% endfor %}
+        {% for video in videos %}
+        <option value="{{ video.id }}" {% if node and node.portrait_land_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="tab-panel{% if tab == 'audio' %} on{% endif %}" data-panel="audio">
+      <label>背景音乐</label>
+      <select name="bgm">
+        <option value="">沿用上一段</option>
+        {% for audio in audios %}
+        <option value="{{ audio.id }}" {% if node and node.bgm_id == audio.id %}selected{% endif %}>{{ audio.name }}</option>
+        {% endfor %}
+      </select>
+      <label>语音</label>
+      <select name="voice">
+        <option value="">无</option>
+        {% for audio in audios %}
+        <option value="{{ audio.id }}" {% if node and node.voice_id == audio.id %}selected{% endif %}>{{ audio.name }}</option>
+        {% endfor %}
+      </select>
+      <label>交互音频</label>
+      <p class="sub">玩家点击这段对白时播放一次。不循环，也不会替换背景音乐。</p>
+      <select name="interact">
+        <option value="">不播放</option>
+        {% for audio in audios %}
+        <option value="{{ audio.id }}" {% if node and node.interact_id == audio.id %}selected{% endif %}>{{ audio.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="tab-panel{% if tab == 'insert' %} on{% endif %}" data-panel="insert">
+      <label>结束后插入 <span class="sub">对白播完后全屏播放。视频或图片都可以，玩家点击即可跳过，然后出现在故事解锁里。</span></label>
+      <select name="insert_media">
+        <option value="">不插入</option>
+        {% for image in images %}
+        <option value="{{ image.id }}" {% if node and node.insert_media_id == image.id %}selected{% endif %}>图片 · {{ image.name }}</option>
+        {% endfor %}
+        {% for video in videos %}
+        <option value="{{ video.id }}" {% if node and node.insert_media_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+        {% endfor %}
+      </select>
+      <label>解锁标题 <span class="sub">留空则用素材名称</span></label>
+      <input type="text" name="insert_title" value="{{ node.insert_title|default:'' }}" placeholder="故事解锁里显示的名字">
+    </div>
+
+    <div class="tab-panel{% if tab == 'choice' %} on{% endif %}" data-panel="choice">
+      <p class="sub">有选项时，玩家点选项跳转，不再使用「对白」里的下一句。交互音频在玩家点击时播放一次。</p>
+      {% for choice in choices %}
+      <input type="hidden" name="choice_id" value="{{ choice.id }}">
+      <label>选项文字</label>
+      <input type="text" name="choice_text" value="{{ choice.text }}">
+      <label>跳转到</label>
+      <select name="choice_next">
+        <option value="">请选择</option>
+        {% for item in nodes %}
+        <option value="{{ item.id }}" {% if choice.next_node_id == item.id %}selected{% endif %}>{{ item.node_key }}</option>
+        {% endfor %}
+      </select>
+      <label>点这个选项时播放</label>
+      <select name="choice_interact">
+        <option value="">不播放</option>
+        {% for audio in audios %}
+        <option value="{{ audio.id }}" {% if choice.interact_id == audio.id %}selected{% endif %}>{{ audio.name }}</option>
+        {% endfor %}
+      </select>
+      {% endfor %}
+      <input type="hidden" name="choice_id" value="">
+      <label>新选项</label>
+      <input type="text" name="choice_text" placeholder="留空表示不添加">
+      <label>新选项跳转到</label>
+      <select name="choice_next">
+        <option value="">请选择</option>
+        {% for item in nodes %}
+        <option value="{{ item.id }}">{{ item.node_key }}</option>
+        {% endfor %}
+      </select>
+      <label>新选项的交互音频</label>
+      <select name="choice_interact">
+        <option value="">不播放</option>
+        {% for audio in audios %}
+        <option value="{{ audio.id }}">{{ audio.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <button type="submit">保存剧情</button>
+  </form>
+  {% if node %}
+  <form method="post" onsubmit="return confirm('删除这段剧情？')">
+    <input type="hidden" name="action" value="delete">
+    <button class="danger" type="submit">删除这段</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

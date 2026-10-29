@@ -1,0 +1,20 @@
+<div class="card">
+  <h2>图片尺寸标准</h2>
+  <p class="sub">横屏和竖屏各做一张。上传的像素必须和下面完全一致，播放端切换方向时会换上对应的那一张。</p>
+  <table>
+    <thead>
+      <tr><th>用途</th><th>方向</th><th>像素</th><th>比例</th><th>画面要求</th></tr>
+    </thead>
+    <tbody>
+      {% for spec in image_specs %}
+      <tr>
+        <td>{{ spec.title }}</td>
+        <td>{% if spec.screen == "portrait" %}竖屏{% else %}横屏{% endif %}</td>
+        <td>{{ spec.width }} × {{ spec.height }}</td>
+        <td>{{ spec.ratio }}</td>
+        <td>{{ spec.note }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

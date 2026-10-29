@@ -1,0 +1,145 @@
+import logging
+from asyncio import Lock
+
+from django.core.paginator import EmptyPage
+from rest_framework.exceptions import NotFound
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.views import exception_handler
+import os
+from logging.handlers import TimedRotatingFileHandler
+import logging
+
+class ApiResponse(Response):
+    """统一响应格式（修复后）"""
+    def __init__(self, data=None, message='success', code=200, pagination=None,**kwargs):
+        # 确保message是字符串类型
+        from Apps.views.Otome.i18n import tr
+
+        if isinstance(message, str):
+            message = tr(message)
+        if not isinstance(message, str):
+            # 如果是字典类型（如表单验证错误），转换为字符串
+            if isinstance(message, dict):
+                # 将字典转换为用分号分隔的键值对字符串
+                message = "; ".join([f"{k}: {', '.join(v)}" for k, v in message.items()])
+            else:
+                # 其他类型强制转换为字符串
+                message = str(message)
+        # 确保data不为null，如果为null则设为空字典
+        if data is None:
+            data = {}
+
+        response_data = {
+            'code': code,
+            'message': message,
+            'results': data
+        }
+
+        if pagination is not None:
+            response_data["pagination"] = pagination
+        # 始终使用200作为HTTP状态码
+        super().__init__(response_data, status=200, **kwargs)
+
+
+
+class CustomPagination(PageNumberPagination):
+    page_size = 20  # 默认每页条数
+    page_query_param = 'currentPage'  # 关键：匹配前端的 "currentPage" 参数（指定页码）
+    page_size_query_param = 'pageSize'  # 匹配前端的 "pageSize" 参数（指定每页条数）
+    max_page_size = 50
+
+    def get_paginated_response(self, data):
+        # 现在这个方法会在分页生效时被自动调用
+        pagination_info = {
+            'page': self.page.number,
+            'page_size': self.page.paginator.per_page,
+            'total': self.page.paginator.count,
+            'total_pages': self.page.paginator.num_pages
+        }
+        # data直接就是列表，pagination同级传入ApiResponse
+        return ApiResponse(data=data, pagination=pagination_info)
+
+    def paginate_queryset(self, queryset, request, view=None):
+        """
+        处理超出范围的页码请求
+        """
+        try:
+            return super().paginate_queryset(queryset, request, view=view)
+        except Exception as e:
+            # 捕获所有分页相关的异常
+            if "Invalid page" in str(e) or isinstance(e, EmptyPage):
+                # 当请求的页码无效时，返回空结果而不是抛出异常
+                self.request = request
+                # 创建一个空的分页结果
+                page_size = self.get_page_size(request) or self.page_size
+                from django.core.paginator import Paginator
+                empty_paginator = Paginator([], page_size)
+                self.page = empty_paginator.page(1)
+                return []
+            # 如果是其他异常，重新抛出
+            raise e
+from django.utils.translation import gettext as _
+def custom_exception_handler(exc, context):
+    """
+    自定义异常处理函数
+    """
+    # 调用默认的异常处理函数
+    response = exception_handler(exc, context)
+
+    # 如果是页面无效的错误，返回自定义响应
+    if isinstance(exc, NotFound) and ("Invalid page" in str(exc.detail) or "无效页面" in str(exc.detail)):
+        return ApiResponse(
+            data={
+                'pagination': {
+                    'page': 1,
+                    'page_size': 20,
+                    'total': 0,
+                    'total_pages': 0
+                },
+                'results': []
+            },
+            message=_("请求的页面超出范围，返回空结果"),
+            code=200
+        )
+
+    if response is not None:
+        from Apps.views.Otome.i18n import translate_data
+
+        response.data = translate_data(response.data)
+    return response
+
+
+def exclude_api_tag_hook(endpoints=None, **kwargs):
+    """
+    排除默认的 'api' 标签
+    """
+    if endpoints is None:
+        endpoints = []
+
+    # 创建新的端点列表
+    filtered_endpoints = []
+
+    for endpoint in endpoints:
+        print("Endpoint:", endpoint)
+
+        # 获取操作对象（第三个元素）
+        operation = endpoint[2]
+        print("Operation:", operation)
+
+        # 检查 operation 是否为字典且包含 tags 字段
+        if isinstance(operation, dict) and 'tags' in operation:
+            # 如果包含 'api' 标签，则移除
+            if 'api' in operation['tags']:
+                print("找到了tags", operation['tags'])
+                operation['tags'] = [tag for tag in operation['tags'] if tag != 'api']
+
+                # 如果标签为空，则移除整个标签字段
+                if not operation['tags']:
+                    del operation['tags']
+
+        # 添加到过滤后的端点列表
+        filtered_endpoints.append(endpoint)
+
+    return filtered_endpoints
+

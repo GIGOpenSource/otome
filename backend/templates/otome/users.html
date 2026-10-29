@@ -1,0 +1,94 @@
+{% extends "otome/base.html" %}
+{% block title %}用户列表 · 乙游后台{% endblock %}
+{% block content %}
+<h1>用户列表</h1>
+<p class="sub">前端是设备号或 Google 登录进来的玩家。后台是账号表里的管理人员。两边都可以打游戏标签，并按标签筛选。</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<div class="card">
+  <form method="get" class="filters">
+    <select name="side">
+      <option value="" {% if not selected_side %}selected{% endif %}>前端和后台</option>
+      <option value="frontend" {% if selected_side == "frontend" %}selected{% endif %}>只看前端</option>
+      <option value="backend" {% if selected_side == "backend" %}selected{% endif %}>只看后台</option>
+    </select>
+    <select name="game">
+      <option value="">全部游戏</option>
+      {% for game in games %}
+      <option value="{{ game.id }}" {% if selected_game == game.id %}selected{% endif %}>{{ game.title }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="q" value="{{ keyword }}" placeholder="UID、昵称、账号或邮箱">
+    <button type="submit">筛选</button>
+  </form>
+</div>
+
+{% if selected_side != "backend" %}
+<div class="card">
+  <h2>前端用户</h2>
+  <table>
+    <thead>
+      <tr><th>UID</th><th>登录</th><th>广告渠道</th><th>游戏标签</th></tr>
+    </thead>
+    <tbody>
+      {% for row in frontend %}
+      <tr>
+        <td>
+          <span class="id">{{ row.uid }}</span>
+          <div class="sub">{{ row.name }}{% if row.email %} · {{ row.email }}{% endif %}</div>
+        </td>
+        <td>{{ row.login_label }}</td>
+        <td>{% if row.channel_id %}<span class="id">{{ row.channel_id }}</span><div class="sub">{{ row.channel_name }}</div>{% endif %}</td>
+        <td>
+          {% for tag in row.tags %}<span class="tag">{{ tag.title }}</span>{% empty %}<span class="sub">还没有</span>{% endfor %}
+          <form method="post" class="tag-form">
+            <input type="hidden" name="action" value="tags">
+            <input type="hidden" name="side" value="frontend">
+            <input type="hidden" name="owner_id" value="{{ row.id }}">
+            {% for game in games %}
+            <label class="check"><input type="checkbox" name="games" value="{{ game.id }}" {% if game.id in row.game_ids %}checked{% endif %}>{{ game.title }}</label>
+            {% endfor %}
+            <button type="submit">保存标签</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">还没有前端用户。玩家打开游戏后会按设备号自动出现。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if selected_side != "frontend" %}
+<div class="card">
+  <h2>后台用户</h2>
+  <table>
+    <thead>
+      <tr><th>账号</th><th>角色</th><th>游戏标签</th></tr>
+    </thead>
+    <tbody>
+      {% for row in backend %}
+      <tr>
+        <td>{{ row.name }}<div class="sub">{{ row.email }}</div></td>
+        <td>{{ row.role }}</td>
+        <td>
+          {% for tag in row.tags %}<span class="tag">{{ tag.title }}</span>{% empty %}<span class="sub">还没有</span>{% endfor %}
+          <form method="post" class="tag-form">
+            <input type="hidden" name="action" value="tags">
+            <input type="hidden" name="side" value="backend">
+            <input type="hidden" name="owner_id" value="{{ row.id }}">
+            {% for game in games %}
+            <label class="check"><input type="checkbox" name="games" value="{{ game.id }}" {% if game.id in row.game_ids %}checked{% endif %}>{{ game.title }}</label>
+            {% endfor %}
+            <button type="submit">保存标签</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3">还没有后台账号。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

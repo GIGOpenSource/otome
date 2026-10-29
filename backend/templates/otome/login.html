@@ -1,0 +1,24 @@
+{% extends "otome/base.html" %}
+{% block title %}{{ ui.page_title }}{% endblock %}
+{% block content %}
+<h1>{{ ui.heading }}</h1>
+<p class="sub">{{ ui.intro }}</p>
+<div class="card">
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  <form method="get">
+    <label>{{ ui.language }}</label>
+    <select name="lang" onchange="this.form.submit()">
+      {% for item in languages %}
+      <option value="{{ item.code }}" {% if item.code == lang %}selected{% endif %}>{{ item.name }}</option>
+      {% endfor %}
+    </select>
+  </form>
+  <form method="post">
+    <input type="hidden" name="lang" value="{{ lang }}">
+    <label>{{ ui.key }}</label>
+    <input type="password" name="key" autofocus>
+    {% if hint %}<p class="sub">{{ ui.hint }}{{ hint }}</p>{% endif %}
+    <button type="submit">{{ ui.enter }}</button>
+  </form>
+</div>
+{% endblock %}

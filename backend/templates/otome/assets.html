@@ -1,0 +1,131 @@
+{% extends "otome/base.html" %}
+{% block title %}素材库 · 乙游后台{% endblock %}
+{% block content %}
+<h1>素材库</h1>
+<p class="sub">图片和音频放在这里。故事里选中某张图或一段声音后，替换素材，所有引用它的游戏都会换成新的。</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+{% include "otome/image_specs.html" %}
+<div class="card">
+  <h2>上传文件</h2>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="upload">
+    <label>名称</label>
+    <input type="text" name="name" placeholder="不填则用文件名">
+    <label>类型</label>
+    <select name="asset_type">
+      <option value="image">图片</option>
+      <option value="audio">音频</option>
+      <option value="video">视频</option>
+    </select>
+    <label>用途</label>
+    <select name="usage">
+      <option value="background">背景</option>
+      <option value="character">立绘</option>
+      <option value="cover">封面</option>
+    </select>
+    <label>方向</label>
+    <select name="screen">
+      <option value="portrait">竖屏</option>
+      <option value="landscape">横屏</option>
+    </select>
+    <p class="sub">图片会按上面的标准核对像素。音频不用选用途和方向。</p>
+    <label>文件</label>
+    <input type="file" name="file" required>
+    <button type="submit">上传</button>
+  </form>
+</div>
+<div class="card">
+  <h2>填写外链</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="url">
+    <label>名称</label>
+    <input type="text" name="name">
+    <label>类型</label>
+    <select name="asset_type">
+      <option value="image">图片</option>
+      <option value="audio">音频</option>
+      <option value="video">视频</option>
+    </select>
+    <label>用途</label>
+    <select name="usage">
+      <option value="background">背景</option>
+      <option value="character">立绘</option>
+      <option value="cover">封面</option>
+    </select>
+    <label>方向</label>
+    <select name="screen">
+      <option value="portrait">竖屏</option>
+      <option value="landscape">横屏</option>
+    </select>
+    <p class="sub">外链无法在这里量像素，请按尺寸标准自己做好再填地址。</p>
+    <label>地址</label>
+    <input type="url" name="url" placeholder="https://">
+    <button type="submit">保存外链</button>
+  </form>
+</div>
+{% for item in assets %}
+<div class="card">
+  <strong>{{ item.obj.standard_label }}</strong>
+  <span class="sub">{{ item.type_label }}{% if item.spec_note %} · {{ item.spec_note }}{% endif %} · ID {{ item.obj.id }}</span>
+  {% if item.obj.asset_type == "image" and item.file_url %}
+  <div class="row"><img class="thumb" src="{{ item.file_url }}" alt=""></div>
+  {% endif %}
+  {% if item.obj.asset_type == "audio" and item.file_url %}
+  <audio controls src="{{ item.file_url }}"></audio>
+  {% endif %}
+  {% if item.obj.asset_type == "video" and item.file_url %}
+  <video controls src="{{ item.file_url }}" style="max-width: 280px;"></video>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="upload">
+    <input type="hidden" name="asset_id" value="{{ item.obj.id }}">
+    <input type="hidden" name="asset_type" value="{{ item.obj.asset_type }}">
+    {% if item.obj.asset_type == "image" %}
+    <label>用途</label>
+    <select name="usage">
+      <option value="background" {% if item.obj.usage == "background" %}selected{% endif %}>背景</option>
+      <option value="character" {% if item.obj.usage == "character" %}selected{% endif %}>立绘</option>
+      <option value="cover" {% if item.obj.usage == "cover" %}selected{% endif %}>封面</option>
+    </select>
+    <label>方向</label>
+    <select name="screen">
+      <option value="portrait" {% if item.obj.screen == "portrait" %}selected{% endif %}>竖屏</option>
+      <option value="landscape" {% if item.obj.screen == "landscape" %}selected{% endif %}>横屏</option>
+    </select>
+    {% endif %}
+    <label>换成新文件</label>
+    <input type="file" name="file">
+    <button type="submit">替换文件</button>
+  </form>
+  <form method="post">
+    <input type="hidden" name="action" value="url">
+    <input type="hidden" name="asset_id" value="{{ item.obj.id }}">
+    <input type="hidden" name="name" value="{{ item.obj.name }}">
+    <input type="hidden" name="asset_type" value="{{ item.obj.asset_type }}">
+    {% if item.obj.asset_type == "image" %}
+    <label>用途</label>
+    <select name="usage">
+      <option value="background" {% if item.obj.usage == "background" %}selected{% endif %}>背景</option>
+      <option value="character" {% if item.obj.usage == "character" %}selected{% endif %}>立绘</option>
+      <option value="cover" {% if item.obj.usage == "cover" %}selected{% endif %}>封面</option>
+    </select>
+    <label>方向</label>
+    <select name="screen">
+      <option value="portrait" {% if item.obj.screen == "portrait" %}selected{% endif %}>竖屏</option>
+      <option value="landscape" {% if item.obj.screen == "landscape" %}selected{% endif %}>横屏</option>
+    </select>
+    {% endif %}
+    <label>或改成外链</label>
+    <input type="url" name="url" value="{{ item.obj.url }}">
+    <button class="ghost" type="submit">保存外链</button>
+  </form>
+  <form method="post" onsubmit="return confirm('删除后，用到它的剧情会失去这张图或这段声音')">
+    <input type="hidden" name="action" value="delete">
+    <input type="hidden" name="asset_id" value="{{ item.obj.id }}">
+    <button class="danger" type="submit">删除</button>
+  </form>
+</div>
+{% empty %}
+<p>还没有素材。</p>
+{% endfor %}
+{% endblock %}

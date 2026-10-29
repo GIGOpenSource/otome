@@ -1,0 +1,41 @@
+{% extends "otome/base.html" %}
+{% block title %}游戏列表 · 乙游后台{% endblock %}
+{% block content %}
+<h1>游戏列表</h1>
+<p class="sub">配好一部故事并发布后，把游戏 ID 写进单独的客户端。客户端里没有配置功能，只能播放。</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+<div class="card">
+  <h2>新建游戏</h2>
+  <form method="post">
+    <label>标题</label>
+    <input type="text" name="title" placeholder="例如：星河未眠">
+    <label>副标题</label>
+    <input type="text" name="subtitle">
+    <label>简介</label>
+    <textarea name="summary"></textarea>
+    <button type="submit">创建并编辑</button>
+  </form>
+</div>
+<div class="card">
+  <table>
+    <thead>
+      <tr><th>游戏 ID</th><th>标题</th><th>状态</th><th>进入游戏</th><th>落地页</th><th>剧情</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for game in games %}
+      <tr>
+        <td><span class="id">{{ game.id }}</span></td>
+        <td>{{ game.title }}<div class="sub">{{ game.subtitle }}</div></td>
+        <td>{{ game.status_label }}</td>
+        <td>{% if game.play_url %}<a href="{{ game.play_url }}" target="_blank" rel="noopener">{{ game.play_url }}</a>{% endif %}</td>
+        <td>{% if game.landing_page_url %}<a href="{{ game.landing_page_url }}" target="_blank" rel="noopener">{{ game.landing_page_url }}</a>{% endif %}</td>
+        <td>{{ game.node_count }} 段</td>
+        <td><a href="/otome-admin/games/{{ game.id }}/">编辑</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7">还没有故事。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{
+	"pages": [
+		{
+			"path": "pages/loading/loading",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "星河剧场",
+				"disableScroll": true
+			}
+		},
+		{
+			"path": "pages/saves/saves",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "历史存档",
+				"disableScroll": false
+			}
+		},
+		{
+			"path": "pages/gallery/gallery",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "故事解锁",
+				"disableScroll": false
+			}
+		},
+		{
+			"path": "pages/play/play",
+			"style": {
+				"navigationStyle": "custom",
+				"navigationBarTitleText": "剧情",
+				"disableScroll": true
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "星河剧场",
+		"navigationBarBackgroundColor": "#161226",
+		"backgroundColor": "#100c18"
+	},
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"^u-(.*)": "uview-plus/components/u-$1/u-$1.vue"
+		}
+	}
+}

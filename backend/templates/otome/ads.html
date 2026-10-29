@@ -1,0 +1,128 @@
+{% extends "otome/base.html" %}
+{% block title %}广告 · 乙游后台{% endblock %}
+{% block content %}
+<h1>广告</h1>
+<p class="sub">创建来源后会生成一条落地页链接。把链接投到广告里，打开后可以下载 Google 或 iOS 版本。玩家安装并进入游戏后，会用这次访问对上来源。内置广告只出现在所选游戏里。</p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+<div class="card">
+  <form method="get" class="filters">
+    <select name="game">
+      <option value="">全部游戏</option>
+      {% for game in games %}
+      <option value="{{ game.id }}" {% if selected_game == game.id %}selected{% endif %}>{{ game.title }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">筛选</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>新建用户来源</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="create_channel">
+    <input type="hidden" name="filter_game" value="{{ selected_game }}">
+    <label>名称</label>
+    <input type="text" name="name" placeholder="例如 抖音投放">
+    <label>对应游戏</label>
+    <select name="game">
+      <option value="">选择游戏</option>
+      {% for game in games %}
+      <option value="{{ game.id }}">{{ game.title }}</option>
+      {% endfor %}
+    </select>
+    <label>备注</label>
+    <input type="text" name="remark">
+    <button type="submit">创建并生成渠道 ID</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>用户来源</h2>
+  <table>
+    <thead>
+      <tr><th>来源</th><th>渠道 ID</th><th>游戏</th><th>访问</th><th>新增用户</th><th>登录</th><th>状态</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for row in channels %}
+      <tr>
+        <td>{{ row.name }}<div class="sub">{{ row.remark }}</div></td>
+        <td><span class="id">{{ row.channel_id }}</span><div class="sub"><a href="{{ row.landing_url }}" target="_blank" rel="noopener">{{ row.landing_url }}</a></div></td>
+        <td><span class="tag">{{ row.game_title }}</span></td>
+        <td>{{ row.visit_count }}</td>
+        <td>{{ row.user_count }}</td>
+        <td>{{ row.login_count }}</td>
+        <td>{{ row.status|yesno:"启用,停用" }}</td>
+        <td>
+          <form method="post" class="split">
+            <input type="hidden" name="id" value="{{ row.id }}">
+            <input type="hidden" name="filter_game" value="{{ selected_game }}">
+            <button class="ghost" name="action" value="toggle_channel" type="submit">{% if row.status == 1 %}停用{% else %}启用{% endif %}</button>
+            <button class="danger" name="action" value="delete_channel" type="submit">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">还没有用户来源。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>新建内置广告</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="create_builtin">
+    <input type="hidden" name="filter_game" value="{{ selected_game }}">
+    <label>标题</label>
+    <input type="text" name="title">
+    <label>对应游戏</label>
+    <select name="game">
+      <option value="">选择游戏</option>
+      {% for game in games %}
+      <option value="{{ game.id }}">{{ game.title }}</option>
+      {% endfor %}
+    </select>
+    <label>位置</label>
+    <select name="slot">
+      {% for value, label in slots %}
+      <option value="{{ value }}">{{ label }}</option>
+      {% endfor %}
+    </select>
+    <label>素材地址</label>
+    <input type="url" name="media_url" placeholder="https://">
+    <label>点击地址</label>
+    <input type="url" name="link_url" placeholder="https://">
+    <button type="submit">创建广告</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>内置广告</h2>
+  <table>
+    <thead>
+      <tr><th>标题</th><th>游戏</th><th>位置</th><th>状态</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for row in builtins %}
+      <tr>
+        <td>{{ row.title }}</td>
+        <td><span class="tag">{{ row.game.title }}</span></td>
+        <td>{{ row.get_slot_display }}</td>
+        <td>{% if row.status == 1 %}启用{% else %}停用{% endif %}</td>
+        <td>
+          <form method="post" class="split">
+            <input type="hidden" name="id" value="{{ row.id }}">
+            <input type="hidden" name="filter_game" value="{{ selected_game }}">
+            <button class="ghost" name="action" value="toggle_builtin" type="submit">{% if row.status == 1 %}停用{% else %}启用{% endif %}</button>
+            <button class="danger" name="action" value="delete_builtin" type="submit">删除</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">还没有内置广告。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+# 按游戏复制出来的客户端，不提交
+frontend/games/
+
+# ==================== Dependencies ====================
+node_modules/
+bower_components/
+
+# ==================== Build / Output ====================
+
+
+unpackage/
+*.tgz
+
+# ==================== Python ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+otome_venv/
+py311_env/
+backend/py311_env/
+venv/
+env/
+ENV/
+
+# ==================== Django ====================
+db.sqlite3
+*.sqlite3
+*.sqlite
+*.db
+*.sqlite3-journal
+/media/
+staticfiles/
+local_settings.py
+
+# Migrations (uncomment if you want to ignore)
+# **/migrations/
+
+# ==================== Secrets / Environment ====================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+
+# ==================== Logs ====================
+*.log
+logs/
+celerybeat-schedule
+celerybeat.pid
+
+# ==================== IDE / Editor ====================
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*.swm
+.hbuilderx/
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# ==================== Testing / Coverage ====================
+.pytest_cache/
+.tox/
+.mypy_cache/
+.cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# ==================== Docker ====================
+*.local.yml
+cert/*
+!cert/.gitkeep
+ssl/*
+!ssl/.gitkeep

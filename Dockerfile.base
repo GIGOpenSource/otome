@@ -1,0 +1,39 @@
+# docker build -f Dockerfile.base -t otome-base:v1 .
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV TZ=Asia/Shanghai
+
+WORKDIR /app
+
+# 国内服务器走阿里云镜像，避免 deb.debian.org / pypi.org 下不动
+RUN set -eux; \
+    for f in /etc/apt/sources.list /etc/apt/sources.list.d/debian.sources; do \
+      if [ -f "$f" ]; then \
+        sed -i \
+          -e 's|https\?://deb.debian.org|http://mirrors.aliyun.com|g' \
+          -e 's|https\?://security.debian.org|http://mirrors.aliyun.com|g' \
+          "$f"; \
+      fi; \
+    done; \
+    apt-get update && apt-get install -y --no-install-recommends \
+        gcc \
+        libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PIP_INDEX_URL=https://mirrors.aliyun.com/pypi/simple
+ENV PIP_TRUSTED_HOST=mirrors.aliyun.com
+
+COPY backend/requirements.txt /tmp/requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r /tmp/requirements.txt
+
+# 单独一层。已有基础镜像重打时，上面的 pip 会命中缓存，只补这个系统库。
+RUN apt-get update && apt-get install -y --no-install-recommends libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+LABEL maintainer="zeasgames"
+LABEL version="1.0"
+LABEL description="Zeasgames backend base image"
+
+CMD ["python", "-c", "import django; print(django.get_version())"]

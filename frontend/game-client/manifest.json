@@ -1,0 +1,60 @@
+{
+	"name": "星河剧场",
+	"appid": "__UNI__OTOME0001",
+	"description": "乙游播放客户端。故事在后台配置，这里只播放。",
+	"versionName": "1.0.0",
+	"versionCode": "100",
+	"transformPx": false,
+	"app-plus": {
+		"usingComponents": true,
+		"nvueStyleCompiler": "uni-app",
+		"compilerVersion": 3,
+		"screenOrientation": ["portrait-primary", "landscape-primary"],
+		"splashscreen": {
+			"alwaysShowBeforeRender": true,
+			"waiting": true,
+			"autoclose": true,
+			"delay": 0
+		},
+		"modules": {},
+		"distribute": {
+			"android": {
+				"usesCleartextTraffic": true,
+				"permissions": [
+					"<uses-permission android:name=\"android.permission.INTERNET\"/>",
+					"<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
+					"<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>",
+					"<uses-permission android:name=\"android.permission.VIBRATE\"/>"
+				]
+			},
+			"ios": {
+				"privacyDescription": {
+					"NSPhotoLibraryUsageDescription": "播放故事图片"
+				}
+			}
+		}
+	},
+	"h5": {
+		"title": "星河剧场",
+		"router": {
+			"mode": "hash",
+			"base": "./"
+		},
+		"devServer": {
+			"port": 3000,
+			"proxy": {
+				"^/api/otome/": {
+					"target": "http://127.0.0.1:8001",
+					"changeOrigin": true,
+					"secure": false
+				},
+				"/media": {
+					"target": "http://127.0.0.1:8001",
+					"changeOrigin": true,
+					"secure": false
+				}
+			}
+		}
+	},
+	"vueVersion": "3"
+}

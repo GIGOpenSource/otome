@@ -1,0 +1,96 @@
+# 先复制 .env.example 为 .env，填上自己的数据库、Redis 和对象存储。
+# 依赖有变化时先打基础镜像，后端镜像继承它：
+#   docker build -f Dockerfile.base -t otome-base:v1 .
+# 再启动：
+#   docker compose up --build -d
+#
+# Nginx 只有一份 nginx.conf。page/frontend、page/admin 是已经打好的页面，ssl/ 是证书。
+# backend/media 会在后端容器启动时复制到 ./media，也就是服务器上的 /www/otome/media。Nginx 直接读这个目录。
+# 改 nginx.conf 需要重新构建 nginx 镜像。
+
+networks:
+  otome_net:
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+    image: otome-nginx:latest
+    container_name: otome-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - otome_net
+    volumes:
+      - ./page/frontend:/usr/share/nginx/html/frontend:ro
+      - ./page/admin:/usr/share/nginx/html/admin:ro
+      - ./media:/usr/share/nginx/html/media:ro
+      - ./ssl:/etc/nginx/cert:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: otome-backend:latest
+    container_name: otome-backend
+    restart: always
+    networks:
+      - otome_net
+    volumes:
+      - ./media:/app/media
+      - ./backend/media:/opt/otome/seed-media:ro
+    environment:
+      TZ: Asia/Shanghai
+      DJANGO_SETTINGS_MODULE: uivsbe_backend.settings.pro
+      POSTGRES_BUILDMART_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_SCHEMA: ${POSTGRES_SCHEMA:-public}
+      REDIS_BUILDMART_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_BUILDMART_PASSWORD: ${REDIS_PASSWORD}
+      OTOME_ADMIN_KEY: ${OTOME_ADMIN_KEY}
+      OTOME_ADMIN_USER: ${OTOME_ADMIN_USER:-admin}
+      OTOME_ADMIN_PASSWORD: ${OTOME_ADMIN_PASSWORD}
+      OTOME_ADMIN_EMAIL: ${OTOME_ADMIN_EMAIL:-admin@example.com}
+      OTOME_FRONTEND_BASE: ${OTOME_FRONTEND_BASE}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_SECURE: ${MINIO_SECURE:-0}
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/', timeout=5)"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 90s
+
+  redis:
+    image: redis:7-alpine
+    container_name: otome-redis
+    restart: always
+    networks:
+      - otome_net
+    volumes:
+      - otome_redis:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  otome_redis:

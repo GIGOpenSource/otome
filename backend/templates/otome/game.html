@@ -1,0 +1,354 @@
+{% extends "otome/base.html" %}
+{% block title %}{{ game.title }} · 乙游后台{% endblock %}
+{% block content %}
+<h1>{{ game.title }}</h1>
+<p class="sub">游戏 ID <span class="id">{{ game.id }}</span>。复制一份前端后，把 <code>config/game.js</code> 里的 <code>GAME_ID</code> 改成这个数字。</p>
+<p class="sub"><code>python scripts/new_game_client.py --game-id {{ game.id }} --name game-{{ game.id }} --title {{ game.title }}</code></p>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+{% include "otome/image_specs.html" %}
+
+<div class="tabs" data-tabs data-current="{{ tab }}">
+  <button type="button" class="tab{% if tab == 'info' %} on{% endif %}" data-tab="info">基本信息</button>
+  <button type="button" class="tab{% if tab == 'characters' %} on{% endif %}" data-tab="characters">角色</button>
+  <button type="button" class="tab{% if tab == 'assets' %} on{% endif %}" data-tab="assets">素材</button>
+  <button type="button" class="tab{% if tab == 'gallery' %} on{% endif %}" data-tab="gallery">故事解锁</button>
+  <button type="button" class="tab{% if tab == 'plot' %} on{% endif %}" data-tab="plot">剧情</button>
+</div>
+
+<div class="card tab-panel{% if tab == 'info' %} on{% endif %}" data-panel="info">
+  <h2>基本信息</h2>
+  {% if cover_url %}
+    {% if game.cover and game.cover.asset_type == "video" %}
+    <video class="thumb" src="{{ cover_url }}" muted></video>
+    {% else %}
+    <img class="thumb" src="{{ cover_url }}" alt="">
+    {% endif %}
+  {% endif %}
+  <form method="post">
+    <input type="hidden" name="action" value="meta">
+    <label>标题</label>
+    <input type="text" name="title" value="{{ game.title }}">
+    <label>副标题</label>
+    <input type="text" name="subtitle" value="{{ game.subtitle }}">
+    <label>简介</label>
+    <textarea name="summary">{{ game.summary }}</textarea>
+    <label>Google 包名 <span class="sub">落地页下载按钮，例如 com.example.game</span></label>
+    <input type="text" name="play_package" value="{{ game.play_package }}">
+    <label>App Store ID <span class="sub">只填数字</span></label>
+    <input type="text" name="ios_app_id" value="{{ game.ios_app_id }}">
+    <label>进入游戏 <span class="sub">玩家直接打开并游玩。留空则用本机客户端，不要填落地页</span></label>
+    <input type="text" name="frontend_url" value="{{ game.frontend_url }}" placeholder="https://">
+    <label>落地页 <span class="sub">下载页，和进入游戏不是同一个链接。留空则用 /land/{{ game.id }}/</span></label>
+    <input type="text" name="landing_url" value="{{ game.landing_url }}" placeholder="https://">
+    <label>编码（可选）</label>
+    <input type="text" name="code" value="{{ game.code|default:'' }}">
+    <label>竖屏封面 <span class="sub">图片 1080 × 1920，或循环播放的视频</span></label>
+    <select name="cover">
+      <option value="">不使用</option>
+      {% for image in images %}
+      <option value="{{ image.id }}" {% if game.cover_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+      {% endfor %}
+      {% for video in videos %}
+      <option value="{{ video.id }}" {% if game.cover_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+      {% endfor %}
+    </select>
+    <label>横屏封面 <span class="sub">图片 1920 × 1080，或循环播放的视频</span></label>
+    <select name="cover_land">
+      <option value="">不使用。横屏时会暂时用竖屏封面</option>
+      {% for image in images %}
+      <option value="{{ image.id }}" {% if game.cover_land_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+      {% endfor %}
+      {% for video in videos %}
+      <option value="{{ video.id }}" {% if game.cover_land_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+      {% endfor %}
+    </select>
+    <label class="check"><input type="checkbox" name="published" {% if published %}checked{% endif %}>发布。发布后，填了这个游戏 ID 的客户端才能玩到。</label>
+    <button type="submit">保存</button>
+  </form>
+  <form method="post" onsubmit="return confirm('删除这部故事？')">
+    <input type="hidden" name="action" value="delete">
+    <button class="danger" type="submit">删除故事</button>
+  </form>
+</div>
+
+<div class="card tab-panel{% if tab == 'characters' %} on{% endif %}" data-panel="characters">
+  <h2>角色</h2>
+  {% for item in characters %}
+  <form method="post">
+    <input type="hidden" name="action" value="character">
+    <input type="hidden" name="character_id" value="{{ item.obj.id }}">
+    {% if item.portrait_url %}
+      {% if item.obj.portrait and item.obj.portrait.asset_type == "video" %}
+      <video class="thumb" src="{{ item.portrait_url }}" muted></video>
+      {% else %}
+      <img class="thumb" src="{{ item.portrait_url }}" alt="">
+      {% endif %}
+    {% endif %}
+    <label>姓名</label>
+    <input type="text" name="name" value="{{ item.obj.name }}">
+    <label>身份</label>
+    <input type="text" name="char_title" value="{{ item.obj.title }}">
+    <label>名字颜色</label>
+    <input type="text" name="name_color" value="{{ item.obj.name_color }}">
+    <label>介绍</label>
+    <textarea name="intro">{{ item.obj.intro }}</textarea>
+    <label>竖屏立绘 <span class="sub">图片 1080 × 1920，或循环播放的视频</span></label>
+    <select name="portrait">
+      <option value="">不使用</option>
+      {% for image in images %}
+      <option value="{{ image.id }}" {% if item.obj.portrait_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+      {% endfor %}
+      {% for video in videos %}
+      <option value="{{ video.id }}" {% if item.obj.portrait_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+      {% endfor %}
+    </select>
+    <label>横屏立绘 <span class="sub">图片 1920 × 1080，或循环播放的视频</span></label>
+    <select name="portrait_land">
+      <option value="">不使用</option>
+      {% for image in images %}
+      <option value="{{ image.id }}" {% if item.obj.portrait_land_id == image.id %}selected{% endif %}>{{ image.standard_label }}</option>
+      {% endfor %}
+      {% for video in videos %}
+      <option value="{{ video.id }}" {% if item.obj.portrait_land_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+      {% endfor %}
+    </select>
+    <label>排序</label>
+    <input type="number" name="sort_order" value="{{ item.obj.sort_order }}">
+    <button type="submit">保存角色</button>
+  </form>
+  <form method="post">
+    <input type="hidden" name="action" value="delete_character">
+    <input type="hidden" name="character_id" value="{{ item.obj.id }}">
+    <button class="ghost" type="submit">删除这个角色</button>
+  </form>
+  {% endfor %}
+  <h3>新增角色</h3>
+  <form method="post">
+    <input type="hidden" name="action" value="character">
+    <label>姓名</label>
+    <input type="text" name="name">
+    <label>身份</label>
+    <input type="text" name="char_title">
+    <label>名字颜色</label>
+    <input type="text" name="name_color" value="#e7c27a">
+    <label>介绍</label>
+    <textarea name="intro"></textarea>
+    <label>竖屏立绘 <span class="sub">1080 × 1920（9:16）</span></label>
+    <select name="portrait">
+      <option value="">不使用</option>
+      {% for image in images %}
+      <option value="{{ image.id }}">{{ image.standard_label }}</option>
+      {% endfor %}
+    </select>
+    <label>横屏立绘 <span class="sub">1920 × 1080（16:9）</span></label>
+    <select name="portrait_land">
+      <option value="">不使用</option>
+      {% for image in images %}
+      <option value="{{ image.id }}">{{ image.standard_label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">添加角色</button>
+  </form>
+</div>
+
+<div class="card tab-panel{% if tab == 'assets' %} on{% endif %}" data-panel="assets">
+  <h2>素材</h2>
+  <p class="sub">这部游戏用到的图片、音频和视频都在这里改。图片仍按竖屏、横屏的像素标准核对。视频用于故事解锁。</p>
+  <h3>上传</h3>
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="upload">
+    <label>名称</label>
+    <input type="text" name="name" placeholder="不填则用文件名">
+    <label>类型</label>
+    <select name="asset_type">
+      <option value="image">图片</option>
+      <option value="audio">音频</option>
+      <option value="video">视频</option>
+    </select>
+    <label>用途</label>
+    <select name="usage">
+      <option value="background">背景</option>
+      <option value="character">立绘</option>
+      <option value="cover">封面</option>
+    </select>
+    <label>方向</label>
+    <select name="screen">
+      <option value="portrait">竖屏</option>
+      <option value="landscape">横屏</option>
+    </select>
+    <p class="sub">只有图片会核对用途和方向。音频、视频不用。</p>
+    <label>文件</label>
+    <input type="file" name="file" required>
+    <button type="submit">上传到这部游戏</button>
+  </form>
+  <h3>外链</h3>
+  <form method="post">
+    <input type="hidden" name="action" value="url">
+    <label>名称</label>
+    <input type="text" name="name">
+    <label>类型</label>
+    <select name="asset_type">
+      <option value="image">图片</option>
+      <option value="audio">音频</option>
+      <option value="video">视频</option>
+    </select>
+    <label>用途</label>
+    <select name="usage">
+      <option value="background">背景</option>
+      <option value="character">立绘</option>
+      <option value="cover">封面</option>
+    </select>
+    <label>方向</label>
+    <select name="screen">
+      <option value="portrait">竖屏</option>
+      <option value="landscape">横屏</option>
+    </select>
+    <label>地址</label>
+    <input type="url" name="url" placeholder="https://">
+    <button type="submit">保存外链</button>
+  </form>
+  {% for item in asset_rows %}
+  <hr>
+  <strong>{{ item.obj.standard_label }}</strong>
+  <span class="sub">{{ item.type_label }}{% if item.spec_note %} · {{ item.spec_note }}{% endif %} · ID {{ item.obj.id }}</span>
+  {% if item.obj.asset_type == "image" and item.file_url %}
+  <div class="row"><img class="thumb" src="{{ item.file_url }}" alt=""></div>
+  {% endif %}
+  {% if item.obj.asset_type == "audio" and item.file_url %}
+  <audio controls src="{{ item.file_url }}"></audio>
+  {% endif %}
+  {% if item.obj.asset_type == "video" and item.file_url %}
+  <video controls src="{{ item.file_url }}" style="max-width: 280px;"></video>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="upload">
+    <input type="hidden" name="asset_id" value="{{ item.obj.id }}">
+    <input type="hidden" name="asset_type" value="{{ item.obj.asset_type }}">
+    {% if item.obj.asset_type == "image" %}
+    <label>用途</label>
+    <select name="usage">
+      <option value="background" {% if item.obj.usage == "background" %}selected{% endif %}>背景</option>
+      <option value="character" {% if item.obj.usage == "character" %}selected{% endif %}>立绘</option>
+      <option value="cover" {% if item.obj.usage == "cover" %}selected{% endif %}>封面</option>
+    </select>
+    <label>方向</label>
+    <select name="screen">
+      <option value="portrait" {% if item.obj.screen == "portrait" %}selected{% endif %}>竖屏</option>
+      <option value="landscape" {% if item.obj.screen == "landscape" %}selected{% endif %}>横屏</option>
+    </select>
+    {% endif %}
+    <label>换成新文件</label>
+    <input type="file" name="file">
+    <button type="submit">替换文件</button>
+  </form>
+  <form method="post" onsubmit="return confirm('删除后，用到它的剧情会失去这件素材')">
+    <input type="hidden" name="action" value="delete_asset">
+    <input type="hidden" name="asset_id" value="{{ item.obj.id }}">
+    <button class="danger" type="submit">删除素材</button>
+  </form>
+  {% empty %}
+  <p>这部游戏还没有素材。</p>
+  {% endfor %}
+</div>
+
+<div class="card tab-panel{% if tab == 'gallery' %} on{% endif %}" data-panel="gallery">
+  <h2>故事解锁</h2>
+  <p class="sub">玩家菜单里会按视频和立绘分开看。没走到解锁剧情、也没有勾选默认解锁的，客户端会盖一层毛玻璃。</p>
+  {% for item in gallery_items %}
+  <form method="post">
+    <input type="hidden" name="action" value="gallery">
+    <input type="hidden" name="item_id" value="{{ item.id }}">
+    <label>标题</label>
+    <input type="text" name="title" value="{{ item.title }}">
+    <label>类型</label>
+    <select name="kind">
+      <option value="video" {% if item.kind == "video" %}selected{% endif %}>视频</option>
+      <option value="portrait" {% if item.kind == "portrait" %}selected{% endif %}>立绘</option>
+    </select>
+    <label>素材</label>
+    <select name="asset">
+      <option value="">请选择</option>
+      {% for image in images %}
+      <option value="{{ image.id }}" {% if item.asset_id == image.id %}selected{% endif %}>立绘/图片 · {{ image.standard_label }}</option>
+      {% endfor %}
+      {% for video in videos %}
+      <option value="{{ video.id }}" {% if item.asset_id == video.id %}selected{% endif %}>视频 · {{ video.name }}</option>
+      {% endfor %}
+    </select>
+    <label>走到哪句后解锁</label>
+    <select name="unlock_node">
+      <option value="">不自动解锁</option>
+      {% for node in nodes %}
+      <option value="{{ node.id }}" {% if item.unlock_node_id == node.id %}selected{% endif %}>{{ node.content|truncatechars:28 }}</option>
+      {% endfor %}
+    </select>
+    <label class="check"><input type="checkbox" name="unlocked_by_default" {% if item.unlocked_by_default %}checked{% endif %}>默认解锁</label>
+    <label>排序</label>
+    <input type="number" name="sort_order" value="{{ item.sort_order }}">
+    <button type="submit">保存这条解锁</button>
+  </form>
+  <form method="post">
+    <input type="hidden" name="action" value="delete_gallery">
+    <input type="hidden" name="item_id" value="{{ item.id }}">
+    <button class="ghost" type="submit">删除这条解锁</button>
+  </form>
+  {% endfor %}
+  <h3>新增解锁内容</h3>
+  <form method="post">
+    <input type="hidden" name="action" value="gallery">
+    <label>标题</label>
+    <input type="text" name="title" placeholder="例如：顾星河">
+    <label>类型</label>
+    <select name="kind">
+      <option value="portrait">立绘</option>
+      <option value="video">视频</option>
+    </select>
+    <label>素材</label>
+    <select name="asset">
+      <option value="">请选择</option>
+      {% for image in images %}
+      <option value="{{ image.id }}">立绘/图片 · {{ image.standard_label }}</option>
+      {% endfor %}
+      {% for video in videos %}
+      <option value="{{ video.id }}">视频 · {{ video.name }}</option>
+      {% endfor %}
+    </select>
+    <label>走到哪句后解锁</label>
+    <select name="unlock_node">
+      <option value="">不自动解锁</option>
+      {% for node in nodes %}
+      <option value="{{ node.id }}">{{ node.content|truncatechars:28 }}</option>
+      {% endfor %}
+    </select>
+    <label class="check"><input type="checkbox" name="unlocked_by_default">默认解锁</label>
+    <button type="submit">添加</button>
+  </form>
+</div>
+
+<div class="card tab-panel{% if tab == 'plot' %} on{% endif %}" data-panel="plot">
+  <h2>剧情</h2>
+  <p class="sub">关键节点会让客户端在进入这一段之前先下载图片和音频。开场会自动当作关键节点。</p>
+  <p><a class="btn" href="/otome-admin/games/{{ game.id }}/nodes/new/">新增剧情</a></p>
+  <table>
+    <thead>
+      <tr><th>编号</th><th>内容</th><th>标记</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for node in nodes %}
+      <tr>
+        <td>{{ node.node_key }}</td>
+        <td>{{ node.content|truncatechars:42 }}</td>
+        <td>
+          {% if node.is_start %}开场 {% endif %}
+          {% if node.is_key %}关键 {% endif %}
+          {% if node.is_ending %}结局 {% endif %}
+        </td>
+        <td><a href="/otome-admin/games/{{ game.id }}/nodes/{{ node.id }}/">编辑</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4">还没有剧情。</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
