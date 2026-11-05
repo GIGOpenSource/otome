@@ -40,6 +40,9 @@ services:
     image: otome-backend:latest
     container_name: otome-backend
     restart: always
+    # 同机 Postgres：经宿主机网关访问，勿用公网 IP / 勿开 5432 对外
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - otome_net
     volumes:
