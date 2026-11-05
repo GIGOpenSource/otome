@@ -19,7 +19,8 @@ from tools.tools import getEnvConfig
 
 # -------------------------- 全局配置项 --------------------------
 # AES 密钥
-AES_SECRET_KEY = getEnvConfig("OTOME_TOKEN_KEY", "change-me-16chars").encode("utf-8")
+# AES 密钥必须是 16 / 24 / 32 字节（示例名曾误导，change-me-16chars 实际是 17）
+AES_SECRET_KEY = getEnvConfig("OTOME_TOKEN_KEY", "0123456789abcdef").encode("utf-8")
 # 登录Token过期时长(小时)
 TOKEN_EXPIRE_HOURS = 2
 # 聊天房间Token过期时长(小时)，可单独配置
