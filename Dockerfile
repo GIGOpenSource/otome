@@ -8,8 +8,10 @@ ENV PYTHONPATH=/app
 
 WORKDIR /app
 
-# 基础镜像里还没有 MinIO 客户端。只补这一个包，不重装全部依赖。
-RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ minio==7.2.15
+# 基础镜像可能缺对象存储 SDK；只补这几个包，不重装全部依赖。
+RUN pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
+    minio==7.2.15 \
+    google-cloud-storage==3.1.0
 
 COPY backend /app
 # 挂载会盖住 /app/media，素材先放到挂载之外，启动时再写入宿主机的 media 目录。

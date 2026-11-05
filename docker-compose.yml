@@ -4,6 +4,7 @@
 # 再启动：
 #   docker compose up --build -d
 #
+# 对象存储由 STORAGE_BACKEND 选择：1=GCS，2=COS，3=MinIO；上传返回公开 URL。
 # Nginx 只有一份 nginx.conf。page/frontend、page/admin 是已经打好的页面，ssl/ 是证书。
 # backend/media 会在后端容器启动时复制到 ./media，也就是服务器上的 /www/otome/media。Nginx 直接读这个目录。
 # 改 nginx.conf 需要重新构建 nginx 镜像。
@@ -62,11 +63,21 @@ services:
       OTOME_ADMIN_PASSWORD: ${OTOME_ADMIN_PASSWORD}
       OTOME_ADMIN_EMAIL: ${OTOME_ADMIN_EMAIL:-admin@example.com}
       OTOME_FRONTEND_BASE: ${OTOME_FRONTEND_BASE}
-      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      MINIO_BUCKET: ${MINIO_BUCKET}
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-2}
+      COS_SECRET_ID: ${COS_SECRET_ID:-}
+      COS_SECRET_KEY: ${COS_SECRET_KEY:-}
+      COS_BUCKET: ${COS_BUCKET:-}
+      COS_REGION: ${COS_REGION:-}
+      COS_DOMAIN: ${COS_DOMAIN:-}
+      GCS_BUCKET: ${GCS_BUCKET:-}
+      GCS_CREDENTIALS: ${GCS_CREDENTIALS:-}
+      GCS_PUBLIC_BASE_URL: ${GCS_PUBLIC_BASE_URL:-}
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-}
+      MINIO_BUCKET: ${MINIO_BUCKET:-}
       MINIO_SECURE: ${MINIO_SECURE:-0}
+      MINIO_PUBLIC_BASE: ${MINIO_PUBLIC_BASE:-}
     depends_on:
       postgres:
         condition: service_healthy

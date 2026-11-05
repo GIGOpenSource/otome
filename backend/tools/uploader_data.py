@@ -16,19 +16,24 @@ from tools.tools import getEnvConfig
 # 配置日志
 logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
-# COS配置
-secret_id = getEnvConfig('TENCENT_COS_SECRET_ID')
-secret_key = getEnvConfig('TENCENT_COS_SECRET_KEY')
-region = getEnvConfig('TENCENT_COS_REGION', )
-bucket_name = getEnvConfig('TENCENT_COS_BUCKET')
+# COS 懒加载，避免未配置时启动刷错误日志。优先 COS_*，兼容旧 TENCENT_COS_*。
+cos_client = None
+region = ""
+bucket_name = ""
 
-# 初始化COS客户端
-try:
-    config = CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key)
-    cos_client = CosS3Client(config)
-    print("COS客户端初始化成功")
-except Exception as e:
-    print("COS客户端初始化失败:", e)
+
+def _ensure_cos_client():
+    global cos_client, region, bucket_name
+    if cos_client is not None:
+        return cos_client
+    secret_id = getEnvConfig("COS_SECRET_ID") or getEnvConfig("TENCENT_COS_SECRET_ID")
+    secret_key = getEnvConfig("COS_SECRET_KEY") or getEnvConfig("TENCENT_COS_SECRET_KEY")
+    region = getEnvConfig("COS_REGION") or getEnvConfig("TENCENT_COS_REGION")
+    bucket_name = getEnvConfig("COS_BUCKET") or getEnvConfig("TENCENT_COS_BUCKET")
+    if not secret_id or not secret_key or not region:
+        raise RuntimeError("未配置 COS（COS_SECRET_ID / COS_SECRET_KEY / COS_REGION）")
+    cos_client = CosS3Client(CosConfig(Region=region, SecretId=secret_id, SecretKey=secret_key))
+    return cos_client
 
 
 @extend_schema(tags=['上传管理'])
@@ -158,8 +163,8 @@ class UploadResourceView(APIView):
             # 读取文件内容
             file_content = uploaded_file.read()
 
-            # 上传到COS
-            response = cos_client.put_object(
+            client = _ensure_cos_client()
+            response = client.put_object(
                 Bucket=bucket_name,
                 Body=file_content,
                 Key=full_file_name,
@@ -204,7 +209,8 @@ def upload_image_to_cos(file_content, full_file_name):
         dict: 包含url和name的字典，或None（上传失败时）
     """
     try:
-        response = cos_client.put_object(
+        client = _ensure_cos_client()
+        response = client.put_object(
             Bucket=bucket_name,
             Body=file_content,
             Key=full_file_name,
