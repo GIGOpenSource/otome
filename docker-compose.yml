@@ -40,9 +40,6 @@ services:
     image: otome-backend:latest
     container_name: otome-backend
     restart: always
-    # 同机 Postgres：经宿主机网关访问，勿用公网 IP / 勿开 5432 对外
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - otome_net
     volumes:
@@ -51,7 +48,7 @@ services:
     environment:
       TZ: Asia/Shanghai
       DJANGO_SETTINGS_MODULE: uivsbe_backend.settings.pro
-      POSTGRES_BUILDMART_HOST: ${POSTGRES_HOST}
+      POSTGRES_BUILDMART_HOST: ${POSTGRES_HOST:-postgres}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -71,6 +68,8 @@ services:
       MINIO_BUCKET: ${MINIO_BUCKET}
       MINIO_SECURE: ${MINIO_SECURE:-0}
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -80,6 +79,30 @@ services:
       retries: 8
       start_period: 90s
 
+  postgres:
+    image: postgres:16
+    container_name: otome-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-otome}
+      POSTGRES_USER: ${POSTGRES_USER:-otome}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+      TZ: Asia/Shanghai
+      PGTZ: Asia/Shanghai
+    # 仅本机可连，不对公网暴露
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - otome_postgres:/var/lib/postgresql/data
+    networks:
+      - otome_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
   redis:
     image: redis:7-alpine
     container_name: otome-redis
@@ -88,11 +111,11 @@ services:
       - otome_net
     volumes:
       - otome_redis:/data
-    # 密码为空时 --requirepass 会吞掉后面参数，必须在 .env 里填 REDIS_PASSWORD
+    # 必须在 .env 填写非空 REDIS_PASSWORD；空密码会导致 requirepass 吞掉后续参数
     command:
       - redis-server
       - --requirepass
-      - ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
+      - ${REDIS_PASSWORD}
       - --appendonly
       - "yes"
     healthcheck:
@@ -102,4 +125,5 @@ services:
       retries: 12
 
 volumes:
+  otome_postgres:
   otome_redis:
