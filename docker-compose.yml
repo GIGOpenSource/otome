@@ -88,7 +88,13 @@ services:
       - otome_net
     volumes:
       - otome_redis:/data
-    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    # 密码为空时 --requirepass 会吞掉后面参数，必须在 .env 里填 REDIS_PASSWORD
+    command:
+      - redis-server
+      - --requirepass
+      - ${REDIS_PASSWORD:?set REDIS_PASSWORD in .env}
+      - --appendonly
+      - "yes"
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 5s
