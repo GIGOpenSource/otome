@@ -5,9 +5,8 @@
 #   docker compose up --build -d
 #
 # 对象存储由 STORAGE_BACKEND 选择：1=GCS，2=COS，3=MinIO；上传返回公开 URL。
-# Nginx 只有一份 nginx.conf。page/frontend、page/admin 是已经打好的页面，ssl/ 是证书。
-# backend/media 会在后端容器启动时复制到 ./media，也就是服务器上的 /www/otome/media。Nginx 直接读这个目录。
-# 改 nginx.conf 需要重新构建 nginx 镜像。
+# Nginx：三个域名共用 page/ 静态站；证书在 page/cert/。
+# backend/media 会在后端容器启动时复制到 ./media。改 nginx.conf / locations 需重建 nginx 镜像。
 
 networks:
   otome_net:
@@ -28,8 +27,10 @@ services:
     volumes:
       - ./page/frontend:/usr/share/nginx/html/frontend:ro
       - ./page/admin:/usr/share/nginx/html/admin:ro
+      - ./page/agreement:/usr/share/nginx/html/agreement:ro
+      - ./page/file:/usr/share/nginx/html/file:ro
+      - ./page/cert:/etc/nginx/certs:ro
       - ./media:/usr/share/nginx/html/media:ro
-      - ./ssl:/etc/nginx/cert:ro
     depends_on:
       backend:
         condition: service_healthy

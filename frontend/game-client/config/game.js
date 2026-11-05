@@ -26,11 +26,10 @@ export function setActiveGameId(id) {
 		resolvedGameId = number
 	}
 }
-// 只有 H5 开发服务器能代理 /api。App 没有这份代理，相对路径会请求失败。
-// 代理只能匹配 /api/otome/ 接口，不能匹配整个 /api，否则源码模块 /api/otome.js 会被转走，页面停在连接超时。
-// App 与正式包请求下面的完整地址。可用 VITE_API_HOST 覆盖。
-const REMOTE_API = "http://127.0.0.1:8001/api"
-const h5DevProxy = import.meta.env.DEV && process.env.UNI_PLATFORM === "h5"
-export const API_HOST = import.meta.env.VITE_API_HOST || (h5DevProxy ? "/api" : REMOTE_API)
+// H5（开发代理 / 线上 caoxi.live、ruxi.ink、caoxi.life）走同域相对路径 /api。
+// App 没有同源代理，用主站完整地址。可用 VITE_API_HOST 覆盖。
+const REMOTE_API = "https://caoxi.live/api"
+const isH5 = process.env.UNI_PLATFORM === "h5"
+export const API_HOST = import.meta.env.VITE_API_HOST || (isH5 ? "/api" : REMOTE_API)
 // 留空时使用后台环境变量 GOOGLE_CLIENT_ID。两边都空则只能用设备号快速登录。
 export const GOOGLE_CLIENT_ID = ""
