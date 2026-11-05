@@ -204,7 +204,7 @@
                 :style="{ background: heat(cellOf(row, col.key).rate), color: heatText(cellOf(row, col.key).rate) }"
               >
                 <strong>{{ cellOf(row, col.key).rate }}%</strong>
-                <span>{{ t('{count}人', { count: cellOf(row, col.key).count }) }}</span>
+                <span>{{ t('{count}人', { count: cellOf(row, col.key).count ?? 0 }) }}</span>
               </div>
             </template>
           </ElTableColumn>

@@ -1,0 +1,14 @@
+<svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="320" height="100" viewBox="0 0 320 100" fill="none">
+<use xlink:href="#stroke0_126_3046" fill="url(#paint0_linear_126_3046)" />
+<mask id="stroke1_126_3046" fill="white">
+<use xlink:href="#stroke0_126_3046" />
+</mask>
+<path d="M24.4204 100H295.58C302.666 100 308.635 94.7044 309.48 87.668L318.12 15.668C319.12 7.3345 312.613 0 304.22 0H15.7804C7.38712 0 0.880138 7.33448 1.88016 15.668L10.5202 87.668C11.3645 94.7044 17.3336 100 24.4204 100Z" stroke-width="1.923" stroke="#E8CAA0" mask="url(#stroke1_126_3046)" />
+<defs>
+<linearGradient id="paint0_linear_126_3046" x1="14.1402" y1="-7.83448" x2="69.1115" y2="134.092" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" />
+<stop offset="1" stop-color="#F3ECE4" />
+</linearGradient>
+<path id="stroke0_126_3046" d="M1.88016 15.668C0.880138 7.33448 7.38712 0 15.7804 0H304.22C312.613 0 319.12 7.3345 318.12 15.668L309.48 87.668C308.635 94.7044 302.666 100 295.58 100H24.4204C17.3336 100 11.3645 94.7044 10.5202 87.668L1.88016 15.668Z" />
+</defs>
+</svg>

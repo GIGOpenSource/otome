@@ -1,0 +1,25 @@
+<svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="334" height="140" viewBox="0 0 334 140" fill="none">
+<use xlink:href="#stroke0_55_1770" fill="url(#paint0_linear_55_1770)" />
+<mask id="stroke1_55_1770" fill="white">
+<use xlink:href="#stroke0_55_1770" />
+</mask>
+<path d="M305 40V36C305 32.6667 302.825 31 298.474 31H260.252C254.658 31 249.686 28 245.335 24L228.555 9C224.204 5 218.3 3 210.842 3L58.8839 0C50.1828 0 43.3462 3 38.3742 9L16 39L305 40Z" stroke-width="1.923" stroke="#A78BAB" stroke-opacity="0.85" mask="url(#stroke1_55_1770)" />
+<use xlink:href="#stroke2_55_1770" fill="url(#paint1_linear_55_1770)" />
+<mask id="stroke3_55_1770" fill="white">
+<use xlink:href="#stroke2_55_1770" />
+</mask>
+<path d="M1.45059 63.8418L27.7957 122.718C30.0503 127.757 35.0549 131 40.5748 131H310C317.18 131 323 125.18 323 118V45C323 37.268 316.732 31 309 31H27.168C22.7592 31 18.608 33.0768 15.9642 36.605L2.48234 54.5978C1.88576 55.3939 1.42272 56.2819 1.11139 57.2268C0.39634 59.3971 0.517306 61.7561 1.45059 63.8418Z" stroke-width="1.923" stroke="#E8CAA0" mask="url(#stroke3_55_1770)" />
+<path d="M51.9377 13.1326L54.8266 15.8087L51.9377 18.4847L49.0488 15.8087L51.9377 13.1326Z" fill="#493451" />
+<defs>
+<linearGradient id="paint0_linear_55_1770" x1="281.098" y1="-3.56018" x2="266.275" y2="67.5193" gradientUnits="userSpaceOnUse">
+<stop offset="0.00600857" stop-color="#663B76" />
+<stop offset="1" stop-color="#AE8AB3" stop-opacity="0.85" />
+</linearGradient>
+<linearGradient id="paint1_linear_55_1770" x1="18.096" y1="23.1655" x2="73.1945" y2="164.976" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" />
+<stop offset="1" stop-color="#F3ECE4" />
+</linearGradient>
+<path id="stroke0_55_1770" d="M305 40V36C305 32.6667 302.825 31 298.474 31H260.252C254.658 31 249.686 28 245.335 24L228.555 9C224.204 5 218.3 3 210.842 3L58.8839 0C50.1828 0 43.3463 3 38.3742 9L16 39L305 40Z" />
+<path id="stroke2_55_1770" d="M15.9642 36.605C18.608 33.0768 22.7592 31 27.168 31H309C316.732 31 323 37.268 323 45V118C323 125.18 317.18 131 310 131H40.5747C35.0549 131 30.0503 127.757 27.7957 122.718L1.45059 63.8418C0.517306 61.7561 0.39634 59.3971 1.11139 57.2268C1.42272 56.2819 1.88576 55.3939 2.48234 54.5978L15.9642 36.605Z" />
+</defs>
+</svg>

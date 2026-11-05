@@ -1,0 +1,25 @@
+<svg preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="323" height="136" viewBox="0 0 323 136" fill="none">
+<use xlink:href="#stroke0_55_1835" fill="url(#paint0_linear_55_1835)" />
+<mask id="stroke1_55_1835" fill="white">
+<use xlink:href="#stroke0_55_1835" />
+</mask>
+<path d="M19 40V36C19 32.6667 21.1753 31 25.5258 31H63.7484C69.3419 31 74.314 28 78.6645 24L95.4452 9C99.7957 5 105.7 3 113.158 3L265.116 0C273.817 0 280.654 3 285.626 9L308 39L19 40Z" stroke-width="1.923" stroke="#A78BAB" stroke-opacity="0.85" mask="url(#stroke1_55_1835)" />
+<use xlink:href="#stroke2_55_1835" fill="url(#paint1_linear_55_1835)" />
+<mask id="stroke3_55_1835" fill="white">
+<use xlink:href="#stroke2_55_1835" />
+</mask>
+<path d="M321.553 65.4747L295.126 127.489C292.926 132.65 287.857 136 282.246 136H13C5.8203 136 0 130.18 0 123V45C0 37.268 6.26802 31 14 31L295.627 31C300.151 31 304.396 33.1856 307.023 36.8677L320.494 55.7439C321.106 56.6026 321.579 57.5527 321.895 58.5592C322.608 60.8315 322.487 63.2837 321.553 65.4747Z" stroke-width="1.923" stroke="#E8CAA0" mask="url(#stroke3_55_1835)" />
+<path d="M172.889 14L175.778 16.6761L172.889 19.3522L170 16.6761L172.889 14Z" fill="#493451" />
+<defs>
+<linearGradient id="paint0_linear_55_1835" x1="42.9022" y1="-3.56018" x2="57.7247" y2="67.5193" gradientUnits="userSpaceOnUse">
+<stop offset="0.00600857" stop-color="#663B76" />
+<stop offset="1" stop-color="#AE8AB3" stop-opacity="0.85" />
+</linearGradient>
+<linearGradient id="paint1_linear_55_1835" x1="304.904" y1="22.7738" x2="244.964" y2="169.7" gradientUnits="userSpaceOnUse">
+<stop stop-color="white" />
+<stop offset="1" stop-color="#F3ECE4" />
+</linearGradient>
+<path id="stroke0_55_1835" d="M19 40V36C19 32.6667 21.1753 31 25.5258 31H63.7484C69.3419 31 74.314 28 78.6645 24L95.4452 9C99.7957 5 105.7 3 113.158 3L265.116 0C273.817 0 280.654 3 285.626 9L308 39L19 40Z" />
+<path id="stroke2_55_1835" d="M307.023 36.8677C304.396 33.1856 300.151 31 295.627 31L14 31C6.26801 31 0 37.268 0 45V123C0 130.18 5.82031 136 13 136H282.246C287.857 136 292.926 132.65 295.126 127.489L321.553 65.4747C322.487 63.2837 322.608 60.8315 321.895 58.5592C321.579 57.5527 321.106 56.6026 320.494 55.7439L307.023 36.8677Z" />
+</defs>
+</svg>

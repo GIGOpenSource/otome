@@ -869,7 +869,6 @@ async function uploadPortraitBatch(files: File[]) {
         const data = await request('/assets/upload/', { method: 'POST', body })
         const asset = data.results as Asset
         if (!asset?.id) throw new Error(t('上传失败'))
-        images.value = [...images.value, asset]
         assets.value = [...assets.value, asset]
         character.images.push({ label, texts: {}, image: asset.id, image_land: asset.id })
         added += 1
